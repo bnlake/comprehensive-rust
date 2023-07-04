@@ -1,7 +1,7 @@
 use std::{thread, time::Duration};
 
 fn main() {
-    thread::spawn(|| {
+    let handle = thread::spawn(|| {
         for i in 0..10 {
             println!(
                 "Count in thread {}: {}",
@@ -12,7 +12,7 @@ fn main() {
         }
     });
 
-    for i in 0..10 {
+    for i in 0..4 {
         println!(
             "Count in thread {}: {}",
             thread::current().name().unwrap(),
@@ -20,4 +20,6 @@ fn main() {
         );
         thread::sleep(Duration::from_secs(1));
     }
+    
+    handle.join().unwrap();
 }
