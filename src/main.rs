@@ -1,25 +1,12 @@
-use std::{thread, time::Duration};
+use std::thread;
 
 fn main() {
-    let handle = thread::spawn(|| {
-        for i in 0..10 {
-            println!(
-                "Count in thread {}: {}",
-                thread::current().name().unwrap_or("separate thread"),
-                i
-            );
-            thread::sleep(Duration::from_secs(1));
-        }
+    let message: String = "Hello World!".into();
+    thread::scope(|scope| {
+        scope.spawn(|| {
+            println!("Message accessed in scoped thread: {}", message);
+        });
     });
 
-    for i in 0..4 {
-        println!(
-            "Count in thread {}: {}",
-            thread::current().name().unwrap(),
-            i
-        );
-        thread::sleep(Duration::from_secs(1));
-    }
-    
-    handle.join().unwrap();
+    println!("We can still use it here: {}", message);
 }
