@@ -1,18 +1,17 @@
-use std::sync::mpsc;
+use std::{sync::mpsc, thread, time::Duration};
 
 fn main() {
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = mpsc::sync_channel(0);
 
-    tx.send(10).unwrap();
-    tx.send(20).unwrap();
-
-    println!("Channel received: {}", rx.recv().unwrap());
-    println!("Channel received: {}", rx.recv().unwrap());
-
-    let tx2 = tx.clone();
-    tx2.send(100).unwrap();
-    println!(
-        "Same rx channel received: {} from second transmitter",
-        rx.recv().unwrap()
-    );
+    thread::spawn(move || {
+        let thread_id = thread::current().id();
+        for i in 0..10 {
+            tx.send(i).unwrap();
+            println!("Thread {:?} sent message {}", thread_id, i);
+        }
+    });
+    for message in rx.iter() {
+        println!("Received message {} from a publisher", message);
+        thread::sleep(Duration::from_secs(1));
+    }
 }
