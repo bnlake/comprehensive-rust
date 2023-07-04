@@ -1,12 +1,18 @@
-use std::thread;
+use std::sync::mpsc;
 
 fn main() {
-    let message: String = "Hello World!".into();
-    thread::scope(|scope| {
-        scope.spawn(|| {
-            println!("Message accessed in scoped thread: {}", message);
-        });
-    });
+    let (tx, rx) = mpsc::channel();
 
-    println!("We can still use it here: {}", message);
+    tx.send(10).unwrap();
+    tx.send(20).unwrap();
+
+    println!("Channel received: {}", rx.recv().unwrap());
+    println!("Channel received: {}", rx.recv().unwrap());
+
+    let tx2 = tx.clone();
+    tx2.send(100).unwrap();
+    println!(
+        "Same rx channel received: {} from second transmitter",
+        rx.recv().unwrap()
+    );
 }
