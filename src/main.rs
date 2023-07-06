@@ -1,17 +1,18 @@
-use std::{sync::mpsc, thread, time::Duration};
+use std::{sync::Arc, thread};
 
 fn main() {
-    let (tx, rx) = mpsc::sync_channel(0);
+    let v = Arc::new(vec![10, 20, 30]);
+    let mut handles = Vec::new();
 
-    thread::spawn(move || {
-        let thread_id = thread::current().id();
-        for i in 0..10 {
-            tx.send(i).unwrap();
-            println!("Thread {:?} sent message {}", thread_id, i);
-        }
-    });
-    for message in rx.iter() {
-        println!("Received message {} from a publisher", message);
-        thread::sleep(Duration::from_secs(1));
+    for _ in 1..5 {
+        // Arc clones are read only values
+        let v = Arc::clone(&v);
+        handles.push(thread::spawn(move || {
+            let thread_id = thread::current().id();
+            println!("{thread_id:?}: {v:?}");
+        }))
     }
+
+    handles.into_iter().for_each(|h| h.join().unwrap());
+    println!("{v:?}");
 }
