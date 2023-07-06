@@ -1,18 +1,11 @@
-use std::{sync::Arc, thread};
+use std::sync::Mutex;
 
 fn main() {
-    let v = Arc::new(vec![10, 20, 30]);
-    let mut handles = Vec::new();
-
-    for _ in 1..5 {
-        // Arc clones are read only values
-        let v = Arc::clone(&v);
-        handles.push(thread::spawn(move || {
-            let thread_id = thread::current().id();
-            println!("{thread_id:?}: {v:?}");
-        }))
+    let m = Mutex::new(vec![10, 20, 30]);
+    println!("m: {:?}", m.lock().unwrap());
+    {
+        let mut guard = m.lock().unwrap();
+        guard.push(40);
     }
-
-    handles.into_iter().for_each(|h| h.join().unwrap());
-    println!("{v:?}");
+    println!("m: {:?}", m.lock().unwrap());
 }
